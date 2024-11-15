@@ -75,6 +75,7 @@ uint64_t Writer::bytes_pushed() const
 bool Reader::is_finished() const
 {
   // Your code here.
+  //cout << "is finished func has woked , the psd is  "<< this->pip_shut_down && (this->is_empty());
   return this->pip_shut_down && (this->is_empty());
 }
 
@@ -89,7 +90,11 @@ string_view Reader::peek() const
   // Your code here.
   //cout << "this fun run !"<<"  "<< "the value is "<<string_view(&byte_pip.front(), 1)<< endl;
   if(is_empty()) return string_view{};
+
+ 
+  
   return string_view(&byte_pip.front(), 1);
+
 }
 
 void Reader::pop( uint64_t len )
@@ -109,7 +114,7 @@ void Reader::pop( uint64_t len )
     current_size--;
   }
 
-
+  //cout<< len <<"  byte has been read"<<endl;
 
   //cout<<"i'm run!"<< endl;
   

@@ -2,11 +2,16 @@
 
 #include "byte_stream.hh"
 
+#include <string>
+#include <map>
+#include <unordered_set>
+#include <algorithm>
+
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ), char_map(){}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -42,4 +47,19 @@ public:
 
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
+  
+  
+  struct Ichar{
+    
+    char ch;
+    bool is_the_last;
+    Ichar(char c, bool bl): ch(c), is_the_last(bl){}
+    Ichar(): ch('\0'), is_the_last(0){}
+  };
+  
+  int64_t last_limited = -1;
+  std::map<uint64_t, Ichar> char_map;
+  
+  int64_t flag = 0;
+  
 };
