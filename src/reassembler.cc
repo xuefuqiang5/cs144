@@ -7,18 +7,30 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   //cout << "the insert function is working " << data <<"  will be inserted "<< "the last tag is  " << is_last_substring<< endl ;
   int64_t t = first_index + data.size();
   if(is_last_substring) last_limited = max(last_limited, t);
+
+  const int64_t capacity = output_.writer().available_capacity();
   //cout << "the last_limited is :" << last_limited<< endl;
+
+  //cout << "the capacity is : "<<capacity<< "the flag is :"<< flag<< endl; 
   for(uint64_t i = 0, index = first_index; i < data.size(); i++, index++){
-    if(index >= flag + output_.writer().available_capacity()) break;
-    
+    if(index >= static_cast<uint64_t>(flag + capacity)) {break;}
+
+    if(index >= char_map.size()) {char_map.resize(index + 1, '\0'); visited.resize(index + 1, 0);}
+    if(visited[index] != 0) continue;
     char_map[index] = data[i];
+    visited[index] = 1;
+    //cout <<char_map[index] << "  has been insert into char_map"<< endl;
+    count++;
+    
+    
   }
   
 
-  for(int i = flag, cap = output_.writer().available_capacity(); cap > 0; cap--, i++)
+  for(int i = flag, cap = capacity; cap > 0; cap--, i++)
       {
-        if(char_map.find(i) == char_map.end()) break;
+        if(i >= static_cast<int>(char_map.size()) or visited[i] == 0) break;
         output_.writer().push(string(1, char_map[i]));
+        //cout << char_map[i]<< "  has been put into stream"<< endl;
         flag++;
       }
   
@@ -36,5 +48,5 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
 uint64_t Reassembler::bytes_pending() const
 {
   // Your code here.
-  return char_map.size() - flag;
+  return count - flag;
 }

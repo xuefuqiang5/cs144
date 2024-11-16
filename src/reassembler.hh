@@ -6,12 +6,12 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
-
+#include <vector>
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ), char_map(){}
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ), char_map(), visited(){}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -52,8 +52,11 @@ private:
   
   
   int64_t last_limited = -1;
-  std::unordered_map<uint64_t, char> char_map;
-  
+  std::vector<char> char_map;
+  std::vector<bool> visited;
+  uint64_t count = 0;
+
+
   int64_t flag = 0;
   
 };
