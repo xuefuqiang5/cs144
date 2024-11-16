@@ -4,7 +4,7 @@
 
 #include <string>
 #include <map>
-#include <unordered_set>
+#include <unordered_map>
 #include <algorithm>
 
 class Reassembler
@@ -49,16 +49,10 @@ private:
   ByteStream output_; // the Reassembler writes to this ByteStream
   
   
-  struct Ichar{
-    
-    char ch;
-    bool is_the_last;
-    Ichar(char c, bool bl): ch(c), is_the_last(bl){}
-    Ichar(): ch('\0'), is_the_last(0){}
-  };
+  
   
   int64_t last_limited = -1;
-  std::map<uint64_t, Ichar> char_map;
+  std::unordered_map<uint64_t, char> char_map;
   
   int64_t flag = 0;
   

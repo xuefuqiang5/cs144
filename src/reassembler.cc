@@ -10,19 +10,15 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
   //cout << "the last_limited is :" << last_limited<< endl;
   for(uint64_t i = 0, index = first_index; i < data.size(); i++, index++){
     if(index >= flag + output_.writer().available_capacity()) break;
-    if (char_map.find(index) != char_map.end()) 
-    {
-      char_map[index].is_the_last = is_last_substring;
-      continue;
-    }
-    char_map[index] = Ichar(data[i], is_last_substring);
+    
+    char_map[index] = data[i];
   }
   
 
   for(int i = flag, cap = output_.writer().available_capacity(); cap > 0; cap--, i++)
       {
         if(char_map.find(i) == char_map.end()) break;
-        output_.writer().push(string(1, char_map[i].ch));
+        output_.writer().push(string(1, char_map[i]));
         flag++;
       }
   
