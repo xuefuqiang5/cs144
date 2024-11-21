@@ -27,4 +27,8 @@ public:
 
 private:
   Reassembler reassembler_;
+  bool trigger = 0;
+  Wrap32 zero_point{0};
+  uint64_t checkpoint = 0;
+  uint64_t stream_index = 0;
 };
