@@ -1,31 +1,80 @@
 #include "reassembler.hh"
-#include <iostream>
+#include <vector>
 using namespace std;
 
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring )
 {
-  
-  int64_t t = first_index + data.size();
-  if(is_last_substring) last_limited = max(last_limited, t);
-  const int64_t capacity = output_.writer().available_capacity();
-  for(uint64_t i = 0, index = first_index; i < data.size(); i++, index++){
-    if(index >= static_cast<uint64_t>(flag + capacity)) {break;}
-    if(index >= char_map.size()) {char_map.resize(index + 1, '\0'); visited.resize(index + 1, 0);}
-    if(visited[index] != 0) continue;
-    char_map[index] = data[i];
-    visited[index] = 1;
-    count++;
-  }
-  for(int i = flag, cap = capacity; cap > 0; cap--, i++){
-    if(i >= static_cast<int>(char_map.size()) or visited[i] == 0) break;
-    output_.writer().push(string(1, char_map[i]));
-    flag++;
+    uint64_t wd_start = nxt_expected_idx_;
+    uint64_t wd_end = wd_start + output_.writer().available_capacity();
+    uint64_t cur_start = first_index;
+    uint64_t cur_end = cur_start + data.size();
+
+    // set the eof index of this reassembling
+    if (is_last_substring) {
+        eof_idx_ = cur_end;
     }
-  if(flag >= last_limited and last_limited != -1) output_.writer().close();
+
+    if (cur_start >= wd_end) {
+        return;
+    }
+
+    uint64_t start_idx = max(wd_start, cur_start);
+    uint64_t end_idx = min(wd_end, cur_end);
+    if (start_idx >= end_idx) {
+        if (nxt_expected_idx_ == eof_idx_) {
+            output_.writer().close();
+        }
+        return;
+    }
+    uint64_t len = end_idx - start_idx;
+    
+    // insert the current data
+    buf_.insert({start_idx, end_idx, data.substr(start_idx - first_index, len)});
+   
+    // handle the overlapping of intervals
+    std::vector<Interval> merged;
+    auto it = buf_.begin();
+    Interval last = *it;
+    it ++;
+
+    while (it != buf_.end()) {
+        if (it->start <= last.end) {
+            if (last.end < it->end) {
+                last.end = it->end;
+                last.data = last.data.substr(0, it->start - last.start) + it->data;
+            }
+        } else {
+            merged.push_back(last);
+            last = *it;
+        }
+        it ++;
+    }
+    merged.push_back(last);
+
+    buf_.clear();
+    for (const auto& interval : merged) {
+        buf_.insert(interval);
+    }
+
+    // push when it ready
+    it = buf_.begin();
+    while (it->start == nxt_expected_idx_) {
+        output_.writer().push(it->data);
+        nxt_expected_idx_ = it->end;
+        it = buf_.erase(it);
+    }
+
+    // close when all bytes are pushed
+    if (nxt_expected_idx_ == eof_idx_) {
+        output_.writer().close();
+    }
 }
 
 uint64_t Reassembler::bytes_pending() const
 {
-  // Your code here.
-  return count - flag;
+    uint64_t pendcnt = 0;
+    for (const auto& interval : buf_) {
+        pendcnt += interval.end - interval.start;
+    }
+    return pendcnt;
 }
