@@ -5,12 +5,13 @@ using namespace std;
 void TCPReceiver::receive( TCPSenderMessage message )
 {
   // Your code here. 
+  if(this->writer().has_error()) return;
   if(message.SYN) {
     trigger = 1;
     this->zero_point = message.seqno;
   }
 
-
+  if(message.RST) { this->reader().set_error(); return; }
   this->checkpoint += message.sequence_length();
   uint64_t abs = message.seqno.unwrap(zero_point, this->checkpoint);
   
@@ -24,6 +25,8 @@ TCPReceiverMessage TCPReceiver::send() const
 {
   // Your code here.
   TCPReceiverMessage message ;
+  message.RST = this->writer().has_error();
+  if(this->reader().has_error()) message.RST = false;
   uint64_t cap = this->writer().available_capacity();
   message.window_size = (cap > UINT16_MAX) ? UINT16_MAX : cap;
   
