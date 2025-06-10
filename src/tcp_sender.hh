@@ -10,6 +10,7 @@
 #include <memory>
 #include <optional>
 #include <queue>
+#include <deque>
 
 class TCPSender
 {
@@ -48,4 +49,34 @@ private:
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t window_left;
+  uint64_t window_right;
+  uint64_t outstanding_right;
+  uint64_t segment_number;
+  uint64_t abs_number;
+
+  struct outstanding_segment{
+    uint64_t segment_number;
+    uint64_t passing_time;
+    TCPSenderMessage msg;
+  }; 
+
+  enum class TCPState {
+    CLOSE,
+    LISTEN,
+    SYN_SENT,
+    SYN_RCVD,
+    ESTABLISHED,
+    FIN_WAIT_1,
+    FIN_WAIT_2,
+    CLOSE_WAIT,
+    LAST_ACK,
+    TIME_WAIT
+  };
+  struct segment{
+    TCPSenderMessage msg;
+    uint64_t seq_abs;
+  };
+  TCPState current_state;
+  std::deque<segment> outstanding_segments;
 };
