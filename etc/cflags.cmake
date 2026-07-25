@@ -11,7 +11,13 @@ if ((${IS_GNU_COMPILER} AND ${CXX_VERSION_LT_8}) OR (${IS_CLANG_COMPILER} AND ${
     message (FATAL_ERROR "You must compile this project with g++ >= 8 or clang >= 6.")
 endif ()
 if (${IS_CLANG_COMPILER})
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wloop-analysis")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wloop-analysis -Wno-unqualified-std-cast-call -Wno-unused-private-field -Wno-shift-count-overflow -Wno-unused-parameter -Wno-unused-const-variable -Wno-unused-variable")
+endif ()
+
+# macOS endian compatibility
+if (APPLE)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include libkern/OSByteOrder.h")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Dhtobe16=OSSwapHostToBigInt16 -Dhtobe32=OSSwapHostToBigInt32 -Dbe16toh=OSSwapBigToHostInt16 -Dbe32toh=OSSwapBigToHostInt32")
 endif ()
 
 # add some flags for the Release, Debug, and DebugSan modes

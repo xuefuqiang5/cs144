@@ -23,10 +23,12 @@ Socket::Socket(FileDescriptor &&fd, const int domain, const int type) : FileDesc
 
     // verify domain
     len = sizeof(actual_value);
+#ifdef SO_DOMAIN
     SystemCall("getsockopt", getsockopt(fd_num(), SOL_SOCKET, SO_DOMAIN, &actual_value, &len));
     if ((len != sizeof(actual_value)) or (actual_value != domain)) {
         throw runtime_error("socket domain mismatch");
     }
+#endif
 
     // verify type
     len = sizeof(actual_value);
