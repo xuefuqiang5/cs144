@@ -19,13 +19,12 @@ class StreamReassembler {
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
     std::deque<char> assembler_buffer;
-    std::pair<uint64_t, uint64_t> assembler_window;
-    uint64_t unassembled_index; //!< The first needed byte index
-    uint64_t assembled_index; //!< In-order but don't store in bytes index
+    uint64_t assembled_index;
     std::vector<std::pair<uint64_t, uint64_t>> ranges;
     bool _eof_received{false};
     uint64_t _eof_index{0};
     std::deque<bool> received_bits;
+    size_t _unassembled_count{0};
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
