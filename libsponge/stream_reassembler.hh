@@ -23,6 +23,9 @@ class StreamReassembler {
     uint64_t unassembled_index; //!< The first needed byte index
     uint64_t assembled_index; //!< In-order but don't store in bytes index
     std::vector<std::pair<uint64_t, uint64_t>> ranges;
+    bool _eof_received{false};
+    uint64_t _eof_index{0};
+    std::deque<bool> received_bits;
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
