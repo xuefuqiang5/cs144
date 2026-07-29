@@ -38,15 +38,19 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
         return checkpoint >= candidate ? checkpoint - candidate : candidate - checkpoint;
     };
 
-    if (candidate >= mod
-        && distance_to_checkpoint(candidate - mod) < distance_to_checkpoint(candidate)) {
-        candidate -= mod;
+    if (candidate == checkpoint) { return candidate; }
+
+    if (candidate < checkpoint) {
+        if (candidate > UINT64_MAX - mod) { return candidate; }
+
+        return distance_to_checkpoint(candidate) <= distance_to_checkpoint(candidate + mod)
+            ? candidate
+            : candidate + mod;
     }
 
-    if (candidate <= UINT64_MAX - mod
-        && distance_to_checkpoint(candidate + mod) < distance_to_checkpoint(candidate)) {
-        candidate += mod;
-    }
+    if (candidate < mod) { return candidate; }
 
-    return candidate;
+    return distance_to_checkpoint(candidate) <= distance_to_checkpoint(candidate - mod)
+        ? candidate
+        : candidate - mod;
 }
